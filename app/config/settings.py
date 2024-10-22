@@ -29,7 +29,7 @@ class OpenAISettings(LLMSettings):
 
 
 class DatabaseSettings(BaseModel):
-    service_url: str = Field(default_factory=lambda: os.getenv("TIMESCALE_SERVICE_URL"))
+    service_url: str = Field(default_factory=lambda: os.getenv("DATABASE_URL"))
 
 
 class VectorStoreSettings(BaseModel):
