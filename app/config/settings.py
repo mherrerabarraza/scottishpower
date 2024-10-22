@@ -28,10 +28,6 @@ class OpenAISettings(LLMSettings):
     embedding_model: str = Field(default="text-embedding-3-small")
 
 
-class CohereSettings(BaseModel):
-    api_key: str = Field(default_factory=lambda: os.getenv("COHERE_API_KEY"))
-
-
 class DatabaseSettings(BaseModel):
     service_url: str = Field(default_factory=lambda: os.getenv("TIMESCALE_SERVICE_URL"))
 

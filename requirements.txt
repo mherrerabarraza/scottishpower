@@ -4,4 +4,3 @@ psycopg
 python-dotenv
 timescale-vector
 instructor
-cohere
