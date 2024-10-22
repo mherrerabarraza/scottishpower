@@ -1,7 +1,5 @@
 name: timescaledb
 
-# Keys
-
 services:
   timescaledb:
     image: timescale/timescaledb-ha:pg16
@@ -14,6 +12,14 @@ services:
       - "5432:5432"
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+    restart: unless-stopped
+  api:
+    build: .
+    container_name: api_server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - timescaledb
     restart: unless-stopped
 
 volumes:
