@@ -11,7 +11,7 @@ vec = VectorStore()
 # Is it asssumed that this data was proccessed in a previous steps
 # where the info from the magazine was extracted and stored in a CSV file
 
-magazine_content_df = pd.read_csv("../data/random_books_data.csv", sep=";")
+magazine_content_df = pd.read_csv("../data/random_magazine_data.csv", sep=";")
 
 # Prepare data for insertion
 # prepared for using pgvector
