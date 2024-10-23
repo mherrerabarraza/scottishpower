@@ -4,20 +4,25 @@ services:
   timescaledb:
     image: timescale/timescaledb-ha:pg16
     container_name: timescaledb
-    env_file:
-      - .env
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=scottishpower
+      - POSTGRES_PASSWORD=scottishpower
+      - POSTGRES_USER=scottishpower
     ports:
       - "5432:5432"
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U scottishpower" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
+
   api:
     build: .
-    container_name: api_server
+    container_name: api
     ports:
       - "8000:8000"
     depends_on:
