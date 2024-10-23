@@ -92,45 +92,7 @@ class VectorStore:
         time_range: Optional[Tuple[datetime, datetime]] = None,
         return_dataframe: bool = True,
     ) -> Union[List[Tuple[Any, ...]], pd.DataFrame]:
-        """
-        Query the vector database for similar embeddings based on input text.
-
-        More info:
-            https://github.com/timescale/docs/blob/latest/ai/python-interface-for-pgvector-and-timescale-vector.md
-
-        Args:
-            query: The input text to search for.
-            limit: The maximum number of results to return.
-            metadata_filter: A dictionary or list of dictionaries for equality-based metadata filtering.
-            predicates: A Predicates object for complex metadata filtering.
-                - Predicates objects are defined by the name of the metadata key, an operator, and a value.
-                - Operators: ==, !=, >, >=, <, <=
-                - & is used to combine multiple predicates with AND operator.
-                - | is used to combine multiple predicates with OR operator.
-            time_range: A tuple of (start_date, end_date) to filter results by time.
-            return_dataframe: Whether to return results as a DataFrame (default: True).
-
-        Returns:
-            Either a list of tuples or a pandas DataFrame containing the search results.
-
-        Basic Examples:
-            Basic search:
-                vector_store.semantic_search("What are your shipping options?")
-            Search with metadata filter:
-                vector_store.semantic_search("Shipping options", metadata_filter={"category": "Shipping"})
-        
-        Predicates Examples:
-            Search with predicates:w
-                vector_store.semantic_search("Pricing", predicates=client.Predicates("price", ">", 100))
-            Search with complex combined predicates:
-                complex_pred = (client.Predicates("category", "==", "Electronics") & client.Predicates("price", "<", 1000)) | \
-                               (client.Predicates("category", "==", "Books") & client.Predicates("rating", ">=", 4.5))
-                vector_store.semantic_search("High-quality products", predicates=complex_pred)
-        
-        Time-based filtering:
-            Search with time range:
-                vector_store.semantic_search("Recent updates", time_range=(datetime(2024, 1, 1), datetime(2024, 1, 31)))
-        """
+    
         query_embedding = self.get_embedding(query)
 
         start_time = time.time()
@@ -193,26 +155,7 @@ class VectorStore:
         metadata_filter: dict = None,
         delete_all: bool = False,
     ) -> None:
-        """Delete records from the vector database.
-
-        Args:
-            ids (List[str], optional): A list of record IDs to delete.
-            metadata_filter (dict, optional): A dictionary of metadata key-value pairs to filter records for deletion.
-            delete_all (bool, optional): A boolean flag to delete all records.
-
-        Raises:
-            ValueError: If no deletion criteria are provided or if multiple criteria are provided.
-
-        Examples:
-            Delete by IDs:
-                vector_store.delete(ids=["8ab544ae-766a-11ef-81cb-decf757b836d"])
-
-            Delete by metadata filter:
-                vector_store.delete(metadata_filter={"category": "Shipping"})
-
-            Delete all records:
-                vector_store.delete(delete_all=True)
-        """
+        
         if sum(bool(x) for x in (ids, metadata_filter, delete_all)) != 1:
             raise ValueError(
                 "Provide exactly one of: ids, metadata_filter, or delete_all"
@@ -245,20 +188,7 @@ class VectorStore:
     def keyword_search(
         self, query: str, limit: int = 5, return_dataframe: bool = True
     ) -> Union[List[Tuple[str, str, float]], pd.DataFrame]:
-        """
-        Perform a keyword search on the contents of the vector store.
 
-        Args:
-            query: The search query string.
-            limit: The maximum number of results to return. Defaults to 5.
-            return_dataframe: Whether to return results as a DataFrame. Defaults to True.
-
-        Returns:
-            Either a list of tuples (id, contents, rank) or a pandas DataFrame containing the search results.
-
-        Example:
-            results = vector_store.keyword_search("shipping options")
-        """
         search_sql = f"""
         SELECT id, contents, ts_rank_cd(to_tsvector('english', contents), query) as rank
         FROM {self.vector_settings.table_name}, websearch_to_tsquery('english', %s) query
@@ -293,21 +223,7 @@ class VectorStore:
         rerank: bool = False,
         top_n: int = 5,
     ) -> pd.DataFrame:
-        """
-        Perform a hybrid search combining keyword and semantic search results.
 
-        Args:
-            query: The search query string.
-            keyword_k: The number of results to return from keyword search. Defaults to 5.
-            semantic_k: The number of results to return from semantic search. Defaults to 5.
-            top_n: The number of top results to return after reranking. Defaults to 5.
-
-        Returns:
-            A pandas DataFrame containing the combined search results with a 'search_type' column.
-
-        Example:
-            results = vector_store.hybrid_search("shipping options", keyword_k=3, semantic_k=3, rerank=True, top_n=5)
-        """
         # Perform keyword search
         keyword_results = self.keyword_search(
             query, limit=keyword_k, return_dataframe=True
